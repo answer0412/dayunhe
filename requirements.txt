@@ -1,0 +1,7 @@
+cnsenti==0.0.7
+jieba==0.42.1
+pandas==2.0.3
+pyecharts==2.0.5
+setuptools==68.2.0
+streamlit==1.33.0
+streamlit_echarts==0.4.0
