@@ -35,7 +35,8 @@ def main_bg(main_bg):
     )
 
 # 调用背景图片设置函数
-main_bg('./img/img.png')
+main_bg('./img/back.png')
+st.sidebar.image('./img/ico0.png')
 # 页面标题美化
 st.title("【🌟中国大运河博物馆游客评价数据分析项目🌟】")
 

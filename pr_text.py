@@ -1,99 +1,65 @@
-import streamlit as st
+from collections import Counter
+import openpyxl
 import pandas as pd
-from cnsenti import Emotion, Sentiment
-import jieba
-import re
+from jieba import posseg
+import jieba.analyse
+import jieba.posseg as pseg
+# 创建词性映射表
+flag_en2cn = {
+    'a': '形容词', 'ad': '副形词', 'ag': '形语素', 'an': '名形词', 'b': '区别词',
+    'c': '连词', 'd': '副词', 'df': '不要', 'dg': '副语素',
+    'e': '叹词', 'f': '方位词', 'g': '语素', 'h': '前接成分',
+    'i': '成语', 'j': '简称略语', 'k': '后接成分', 'l': '习用语',
+    'm': '数词', 'mg': '数语素', 'mq': '数量词',
+    'n': '名词', 'ng': '名语素', 'nr': '人名', 'nrfg': '古代人名', 'nrt': '音译人名',
+    'ns': '地名', 'nt': '机构团体', 'nz': '其他专名',
+    'o': '拟声词', 'p': '介词', 'q': '量词',
+    'r': '代词', 'rg': '代语素', 'rr': '代词', 'rz': '代词',
+    's': '处所词', 't': '时间词', 'tg': '时间语素',
+    'u': '助词', 'ud': '得', 'ug': '过', 'uj': '的', 'ul': '了', 'uv': '地', 'uz': '着',
+    'v': '动词', 'vd': '副动词', 'vg': '动语素', 'vi': '动词', 'vn': '名动词', 'vq': '动词',
+    'x': '非语素字', 'y': '语气词', 'z': '状态词', 'zg': '状态语素','eng':'英文','xn':'其他专名'
+}
 
-st.title("中运博网络情感分析")
-st.markdown("""
-*这是中文情感分析**中运博 **对应的测试网站，可以提供简单中文文本的情绪及情感计算。*
-""")
+jieba.load_userdict(r"C:/Users/lbw/Desktop/chat/dayun/dayunhe/add0.txt")#add是自定义添加的词库
 
-st.title('准备数据')
-uploaded_file = st.file_uploader(label='可以对自有的CSV文件进行上传、分析情感、制作词云图', type=['csv'])
-st.markdown("""
-**注意: **上传前请参考[**CSV示例**](https://raw.githubusercontent.com/thunderhit/cnsenti/master/test/cnsenti_example.csv)，将数据文件改为字段名为 **text**, 编码方式为 **UTF-8** 的 CSV
-    """)
+# 1. 读取数据进行分析
+with open("C:/Users/lbw/Desktop/chat/dayun/dayunhe/123.txt", "rb") as f:
+    text_bytes = f.read()
 
+text = text_bytes.decode('utf-8')
+# 进行精确分词
+words_with_pos = jieba.posseg.cut(text)
 
-@st.cache_data
-def wordfreqs_count(uploaded_file='cnsenti_example.csv'):
-    df = pd.read_csv(uploaded_file)
-    df.drop_duplicates(inplace=True)
-    df.dropna(inplace=True)
-    text = ''.join(re.findall('[\u4e00-\u9fa5]+', ''.join(df['text'])))
-    wordfreqs = dict()
-    # for idx, text in enumerate(df['text']):
-    words = jieba.lcut(text)
-    wordset = set(words)
-    for word in wordset:
-        wordfreqs.setdefault(word, 0)
-        wordfreqs[word] = wordfreqs[word] + words.count(word)
-    res = [(k, v) for k, v in wordfreqs.items() if v > 1 and len(k) > 1]
-    return res
+# 将分词结果中的单词部分连接成字符串
+seg_text = ' '.join(word for word, flag in words_with_pos)
+# 2. 基于 TF-IDF算法提取的关键词抽取
+keywords = jieba.analyse.extract_tags(seg_text, withWeight=True, topK=10000)
 
+# 创建一个Workbook对象
+wb = openpyxl.Workbook()
 
-def gen_wordcloud(wordfreqs):
-    from pyecharts import options as opts
-    from pyecharts.charts import WordCloud
-    from streamlit_echarts import st_pyecharts
-    b = (
-        WordCloud()
-        .add(series_name='WordCloud', data_pair=wordfreqs, word_size_range=[6, 66])
-        .set_global_opts(
-            title_opts=opts.TitleOpts(
-                title="",
-                title_textstyle_opts=opts.TextStyleOpts(font_size=23))
-        )
-    )
-    return st_pyecharts(b)
+# 选择默认的工作表
+sheet = wb.active
 
+# 设置工作表标题
+sheet.title = "关键词分析"
 
-st.title('数据分析')
-st.write('\n\n\n\n')
-wc = st.button(label='词云图')
-try:
-    wordfreqs = wordfreqs_count(uploaded_file=uploaded_file)
-except:
-    wordfreqs = wordfreqs_count()
-if wc == True:
-    st.balloons()
-    gen_wordcloud(wordfreqs=wordfreqs)
+# 设置表头
+sheet.append(["关键词", "词频数", "词性", "TF-IDF值"])
 
-# @st.cache(suppress_st_warning=True)
-@st.cache_data
-def measure(uploaded_file='cnsenti_example.csv'):
-    df = pd.read_csv(uploaded_file)
-    df.drop_duplicates(inplace=True)
-    df.dropna(inplace=True)
-    sentiment = Sentiment()
-    emotion = Emotion()
-    sensentiment_res = df['text'].apply(sentiment.sentiment_count).apply(pd.Series)
-    emotion_res = df['text'].apply(emotion.emotion_count).apply(pd.Series)
-    sentiment_result = pd.concat([df, sensentiment_res], axis=1)
-    emotion_result = pd.concat([df, emotion_res], axis=1)
-    return sentiment_result, emotion_result
+# 遍历关键词列表
+for word, weight in keywords:
+    # 使用结巴分词的词性标注功能获取词性
+    words = pseg.cut(word)
+    for w, flag in words:
+        # 计算词频数，使用jieba的词频统计
+        count = text.count(w)
+        # 将英文词性转换为中文词性
+        flag_cn = flag_en2cn.get(flag, '未知')
+        # 将关键词、词频数、词性和权值添加到工作表中
+        sheet.append([w, count, flag_cn, weight])
 
-
-senti = st.button(label='情感计算')
-try:
-    sentiment_result, emotion_result = measure(uploaded_file=uploaded_file)
-except ValueError as e:
-    sentiment_result, emotion_result = measure()
-if senti == True:
-    st.balloons()
-    st.markdown('**Sentiment Result**')
-    st.write(sentiment_result)
-    st.markdown('**Emoion Result**')
-    st.write(emotion_result)
-
-st.markdown("""
-# 仅供学习参考
-- [**情感分析**](https://huggingface.co/hfl/chinese-roberta-wwm-ext/tree/main)
-- [**中运博**](https://canalmuseum.net/)
-- [**dayunhe**](https://canalmuseum.net/)
-- **目前处于测试阶段**
-""")
-st.image('图片1.png')
-
-
+# 保存工作簿到xlsx文件
+wb.save("keywords_analysis.xlsx")
+print("关键词分析结果已保存到keywords_analysis.xlsx文件中。")

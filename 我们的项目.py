@@ -17,7 +17,7 @@ def main_bg(main_bg):
             background-size: cover
         }}
         .welcome-box {{
-            background-color: grey;
+            background-color: #77746c;
             padding: 15px;
             border-radius: 5px;
             text-align: center;
@@ -25,7 +25,7 @@ def main_bg(main_bg):
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }}
         .info-box {{
-        background-color: grey; /* 更改此处以设置文本框的背景颜色 */
+        background-color: #77746c; /* 更改此处以设置文本框的背景颜色 */
         padding: 10px 20px;
         border-radius: 5px;
         margin-bottom: 20px;
@@ -54,7 +54,7 @@ st.markdown(
 )
 
 st.sidebar.success("请在上方侧边栏选择一个操作。")
-
+st.sidebar.image('./img/ico0.png')
 st.markdown(
     """
     <div class="info-box">
@@ -68,12 +68,7 @@ st.markdown(
     - 访问 [大运河博物馆官网](https://canalmuseum.net/) 获取更多官方信息
     - 阅读详细的 [使用文档](https://docs.streamlit.io) 学习如何使用本工具
     - 在 [社区讨论区](https://discuss.streamlit.io) 发表疑问，交流心得
-    
-    
-    
      <br/>
-
-    ### 这里有一张可爱的照片跟您打招呼 😊
 
     </div>
     </div>
@@ -83,6 +78,3 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# 注意：同样请注意确认背景图片URL的有效性以正确展示背景图片。
-
-# 以下为示例代码，假设接下来会根据侧边栏的选择展示具体功能...
