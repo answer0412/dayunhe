@@ -23,7 +23,7 @@ flag_en2cn = {
     'x': '非语素字', 'y': '语气词', 'z': '状态词', 'zg': '状态语素','eng':'英文','xn':'其他专名'
 }
 
-jieba.load_userdict(r"C:/Users/李博文/Desktop/chat/dayun/dayunhe/add0.txt")
+jieba.load_userdict(r"./add0.txt")
 def main_bg(main_bg):
     main_bg_ext = "png"
     st.markdown(
