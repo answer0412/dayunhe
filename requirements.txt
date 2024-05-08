@@ -1,7 +1,11 @@
 cnsenti==0.0.7
+dashscope==1.17.1
 jieba==0.42.1
+openpyxl==3.0.7
 pandas==2.0.3
 pyecharts==2.0.5
+python_docx==1.1.0
+scikit_learn==0.24.2
 setuptools==68.2.0
 streamlit==1.33.0
 streamlit_echarts==0.4.0
