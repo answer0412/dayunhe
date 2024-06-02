@@ -23,7 +23,7 @@ def generate_report(df):
     # 调用dashscope API并合并响应
     full_content = ''
     for response in Generation.call(
-            Generation.Models.qwen_max,
+            Generation.Models.qwen_turbo,
             messages=messages,
             result_format='message',
             stream=True,
