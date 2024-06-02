@@ -57,7 +57,7 @@ def main_bg(main_bg):
         unsafe_allow_html=True
     )
 # 调用背景图片设置函数
-main_bg('./img/back.png')
+main_bg('./img/back1.png')
 def main():
     # 设置页面样式
     # st.set_page_config(layout="centered", page_title="大运河博物馆定制化报告生成器", initial_sidebar_state="expanded")
